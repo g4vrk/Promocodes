@@ -23,5 +23,4 @@ public class PromoPlaceholderFunction extends PrefixedPlaceholderFunction {
         return "promo-code.";
     }
 
-
 }
