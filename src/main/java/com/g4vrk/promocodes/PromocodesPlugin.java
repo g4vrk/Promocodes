@@ -1,5 +1,7 @@
 package com.g4vrk.promocodes;
 
+import com.g4vrk.functionalActions.Action;
+import com.g4vrk.functionalActions.defaults.impl.AudienceActionRegistry;
 import com.g4vrk.functionalActions.list.ExecutableActionList;
 import com.g4vrk.functionalActions.parser.ActionParser;
 import com.g4vrk.functionalActions.parser.impl.SimpleActionParser;
@@ -38,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public final class PromocodesPlugin extends JavaPlugin {
@@ -46,21 +49,25 @@ public final class PromocodesPlugin extends JavaPlugin {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
-    private final ActionParser<Audience> actionParser;
+    private ActionParser<Audience> actionParser;
 
     private CachedConnectionHolder connectionHolder;
 
     public PromocodesPlugin() {
-        ActionRegistry<Audience> actionRegistry = new SimpleActionRegistry<>();
-        actionRegistry.registerAll(ActionRegistries.getDefaultActions(Audience.class));
-
-        this.actionParser = new SimpleActionParser<>(actionRegistry);
     }
 
     @Override
     public void onEnable() {
 
         final File pluginDir = getDataFolder();
+
+        final ActionRegistry<Audience> actionRegistry = new SimpleActionRegistry<>();
+
+        Collection<Action<? super Audience>> defaultActions = new AudienceActionRegistry().getActions();
+
+        actionRegistry.registerAll(defaultActions);
+
+        this.actionParser = new SimpleActionParser<>(actionRegistry);
 
         //noinspection ResultOfMethodCallIgnored
         pluginDir.mkdirs();
@@ -179,7 +186,9 @@ public final class PromocodesPlugin extends JavaPlugin {
             final @NotNull ConfigurationNode node
     ) {
         try {
-            return actionParser.parseAll(node.getList(String.class, new ObjectArrayList<>()));
+            final List<String> rawList = node.getList(String.class, new ObjectArrayList<>());
+
+            return actionParser.parseAll(rawList);
         } catch (final SerializationException ex) {
             throw new RuntimeException("A serialization error occurred while parsing actions", ex);
         }

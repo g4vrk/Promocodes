@@ -69,23 +69,19 @@ public class PromoExecutor {
             final @NotNull String promoId,
             final boolean fromDedicatedCommand
     ) {
-        System.out.println("executing " + promoId);
         final PromoDefinition promo = promos.get(promoId);
 
         if (promo == null) {
-            System.out.println("unknown promo " + promoId);
             unknownPromoActions.run(executor);
             return;
         }
 
         if (promo.isUsingDedicatedCommand() && !fromDedicatedCommand) {
-            System.out.println("promo using dedicated command " + promoId);
             promoUsesDedicatedCommandActions.run(executor, functionFactory.create(executor, promo));
             return;
         }
 
         if (!usageManager.mayUse(promoId)) {
-            System.out.println("promo limit reached " + promoId);
             promoLimitReachedActions.run(executor, functionFactory.create(executor, promo));
             return;
         }
@@ -93,29 +89,23 @@ public class PromoExecutor {
 
         final UUID uuid = getUniqueId(executor);
         if (usageManager.usedAlready(uuid, promoId)) {
-            System.out.println("promo already used by executor " + promoId);
             promoAlreadyActivatedActions.run(executor, functionFactory.create(executor, promo));
             return;
         }
 
-        System.out.println("decrementing promo usages & marking this promo as used by executor");
         usageManager.decrementRemainingUsages(promoId);
         usageManager.markAsUsed(uuid, promoId);
 
         final CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             try {
-                System.out.println("decrementing promo usages & marking this promo as used by executor (in repository)");
                 promoRepository.saveUserIsAbsent(uuid);
                 promoRepository.decreaseRemainingUsages(promoId);
                 promoRepository.markAsUsed(uuid, promoId);
-                System.out.println("finish sql");
             } catch (final SQLException ex) {
                 throw new RuntimeException("An SQL error occurred while accessing to database", ex);
             }
         });
 
-        System.out.println("all in normally!");
-        System.out.println("executing actions of " + promoId);
         future.thenRun(() -> taskRunner.runTask(() -> promo.getActions().run(executor, functionFactory.create(executor, promo)), TickSchedule.instant()));
     }
 
