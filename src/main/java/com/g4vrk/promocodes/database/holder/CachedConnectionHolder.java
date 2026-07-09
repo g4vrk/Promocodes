@@ -9,8 +9,6 @@ public interface CachedConnectionHolder {
 
     @NotNull Connection connect(@NotNull String poolName) throws SQLException;
 
-    void disconnect(@NotNull String poolName) throws SQLException;
-
     void disconnectAll() throws SQLException;
 
 }

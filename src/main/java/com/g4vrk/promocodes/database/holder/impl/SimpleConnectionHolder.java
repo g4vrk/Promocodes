@@ -8,12 +8,13 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleConnectionHolder implements CachedConnectionHolder {
 
     private final Map<String, DatabaseConnector> connectors = new ConcurrentHashMap<>();
-    private final Map<String, Connection> connections = new ConcurrentHashMap<>();
+    private final Set<Connection> activeConnections = ConcurrentHashMap.newKeySet();
 
     private final DatabaseConnectorFactory factory;
 
@@ -25,34 +26,27 @@ public class SimpleConnectionHolder implements CachedConnectionHolder {
 
     @Override
     public @NotNull Connection connect(@NotNull String poolName) {
-        return connections.computeIfAbsent(poolName, s -> {
-            try {
-                return connectors.computeIfAbsent(poolName, factory::create).connect();
-            } catch (final SQLException ex) {
-                throw new RuntimeException("An error occurred while connecting to database", ex);
-            }
-        });
-    }
+        try {
+            final Connection connection = connectors.computeIfAbsent(poolName, factory::create).connect();
 
-    @Override
-    public void disconnect(@NotNull String poolName) throws SQLException {
-        final Connection connection = connections.remove(poolName);
+            activeConnections.add(connection);
 
-        if (connection != null) {
-            disconnect(connection);
+            return connection;
+        } catch (final SQLException ex) {
+            throw new RuntimeException("An error occurred while connecting to database", ex);
         }
     }
 
     @Override
     public void disconnectAll() {
-        connections.values().forEach(connection -> {
+        activeConnections.forEach(connection -> {
             try {
                 disconnect(connection);
             } catch (final SQLException ex) {
                 throw new RuntimeException(ex);
             }
         });
-        connections.clear();
+        activeConnections.clear();
     }
 
     private void disconnect(
