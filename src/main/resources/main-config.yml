@@ -1,0 +1,74 @@
+
+#
+# Promocodes - Плагин на промокоды. (https://github.com/g4vrk/Promocodes)
+# Мой ТГК: t.me/g4studio и t.me/GMine_fun
+#
+#
+# Нашли баг? -> t.me/g4vrk
+# Есть идея? -> t.me/g4vrk
+#
+
+# Настройка команды /<команда> <ID промокода>
+promo-command:
+  # Регистрировать ли команду?
+  enabled: true
+  # Имя команды, ее идентификатор
+  label: "code"
+  # Описание команды
+  description: ""
+  # Алиасы команды
+  aliases:
+    - "promo"
+    - "promocode"
+  # Право на видимость и использование команды
+  # * Если не указывать - можно использовать всем
+  #permission: ""
+
+# Действия
+actions:
+  unknown-promo-actions:
+    - "[message] &#FF3333◆ &8┃ &fТакого промокода не существует... "
+
+  promo-uses-dedicated-command:
+    - "[message] &#FF3333◆ &8┃ &fПромокод имеет выделенную команду! &7Его нельзя использовать напрямую... "
+
+  promo-already-activated:
+    - "[message] &#FF3333◆ &8┃ &fВы уже активировали этот промокод! "
+
+  promo-limit-reached:
+    - "[message] &#FF3333◆ &8┃ &fЛимит использований промокода {promo-code.id} исчерпан..."
+
+# Сам список промокодов, их может быть бесконечное количество
+promos:
+  # ID промокода
+  tiktok:
+    # Базовое количество использований
+    initial-usages: 100
+    # Выделенная команда под промокод
+    dedicated-command:
+      # Использовать выделенную команду или нет?
+      # * Если тут стоит true - Промокод нельзя использовать через /<promo-command> <ID промокода>
+      enabled: true
+      # Такие же настройки, как и у promo-command
+      label: tiktok
+      aliases:
+        - g4vrk
+    # Действия при использовании промокода
+    actions:
+      - "[console] points give {player} 1500"
+      - "[console] lp user {player} parent addtemp prince 7d"
+      - "[sound] ENTITY_LEVEL_UP;1.0;1.0"
+      - "[title] &#33FF33Вы активировали промокод {promo-code.id}"
+      - "[message] "
+      - "[message] &#0083FF&n▊&r  "
+      - "[message] &#0089FF&n▊&r  &#00ACFF◆ &fВы успешно активировали промокод &#00ACFF{promo-code.id} "
+      - "[message] &#008FFF&n▊&r   &7Осталось активаций: {promo-code.remaining-usages}"
+      - "[message] &#0095FF&n▊&r  "
+      - "[message] &#009AFF&n▊&r &fЗа активацию вы получили:"
+      - "[message] &#00A0FF&n▊&r &7- &f1500 Донат-рублей"
+      - "[message] &#00A6FF&n▊&r &7- &fПривилегию &#FFFF00ᴘʀɪɴᴄᴇ &fна &#00ACFF7 дней"
+      - "[message] &#00ACFF▊&r"
+      - "[message] "
+
+# Ну вроде все
+# Удачного использования!

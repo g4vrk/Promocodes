@@ -1,0 +1,14 @@
+name: PromocodesPlugin
+description: "A plugin that provides promo-codes"
+version: '1.0.0'
+main: com.g4vrk.promocodes.PromocodesPlugin
+api-version: '1.16'
+authors:
+  - g4vrk
+website: https://t.me/promocodes
+
+libraries:
+  - it.unimi.dsi:fastutil:8.5.18
+  - org.spongepowered:configurate-yaml:4.2.0
+  - com.zaxxer:HikariCP:7.1.0
+  - me.lucko:commodore:2.2
