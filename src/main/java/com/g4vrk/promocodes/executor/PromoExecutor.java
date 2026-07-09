@@ -3,13 +3,13 @@ package com.g4vrk.promocodes.executor;
 import com.g4vrk.functionalActions.list.ExecutableActionList;
 import com.g4vrk.promocodes.database.repository.impl.PromoRepository;
 import com.g4vrk.promocodes.model.PromoDefinition;
+import com.g4vrk.promocodes.placeholder.PlaceholderFunction;
 import com.g4vrk.promocodes.placeholder.factory.PromoPlaceholderFunctionFactory;
 import com.g4vrk.promocodes.task.runner.TaskRunner;
 import com.g4vrk.promocodes.task.schedule.TickSchedule;
 import com.g4vrk.promocodes.usage.PromoUsageManager;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.kyori.adventure.audience.Audience;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,20 +76,22 @@ public class PromoExecutor {
             return;
         }
 
+        final PlaceholderFunction preProcessor = functionFactory.create(executor, promo);
+
         if (promo.isUsingDedicatedCommand() && !fromDedicatedCommand) {
-            promoUsesDedicatedCommandActions.run(executor, functionFactory.create(executor, promo));
+            promoUsesDedicatedCommandActions.run(executor, preProcessor);
             return;
         }
 
         if (!usageManager.mayUse(promoId)) {
-            promoLimitReachedActions.run(executor, functionFactory.create(executor, promo));
+            promoLimitReachedActions.run(executor, preProcessor);
             return;
         }
 
 
         final UUID uuid = getUniqueId(executor);
         if (usageManager.usedAlready(uuid, promoId)) {
-            promoAlreadyActivatedActions.run(executor, functionFactory.create(executor, promo));
+            promoAlreadyActivatedActions.run(executor, preProcessor);
             return;
         }
 
@@ -106,7 +108,7 @@ public class PromoExecutor {
             }
         });
 
-        future.thenRun(() -> taskRunner.runTask(() -> promo.getActions().run(executor, functionFactory.create(executor, promo)), TickSchedule.instant()));
+        future.thenRun(() -> taskRunner.runTask(() -> promo.getActions().run(executor, preProcessor), TickSchedule.instant()));
     }
 
     private @NotNull UUID getUniqueId(
