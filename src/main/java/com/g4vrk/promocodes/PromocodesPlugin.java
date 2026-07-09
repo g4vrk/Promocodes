@@ -91,7 +91,7 @@ public final class PromocodesPlugin extends JavaPlugin {
                 DatabaseConstants.MAIN_POOL_NAME
         );
 
-        repository.initAsync().join();
+        repository.initialize();
 
         final PromoDefinitionFactory definitionFactory = new PromoDefinitionFactory(actionParser);
         final PromoFactory promoFactory = new PromoFactory(definitionFactory);

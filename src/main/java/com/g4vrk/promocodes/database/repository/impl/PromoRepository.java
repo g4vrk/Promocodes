@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class PromoRepository extends AbstractRepository {
 
@@ -27,14 +26,12 @@ public class PromoRepository extends AbstractRepository {
         super(connectionHolder, poolName);
     }
 
-    public @NotNull CompletableFuture<Void> initAsync() {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                createTables();
-            } catch (final SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+    public void initialize() {
+        try {
+            createTables();
+        } catch (final SQLException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private void createTables(
