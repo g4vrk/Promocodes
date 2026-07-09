@@ -24,6 +24,8 @@ public class DedicatedCommand extends AbstractCommand {
         this.promoExecutor = promoExecutor;
 
         commandData.apply(this);
+
+        executes(this::execute);
     }
 
     private int execute(
@@ -31,7 +33,7 @@ public class DedicatedCommand extends AbstractCommand {
     ) {
         final Audience executor = context.getSource();
 
-        promoExecutor.execute(executor, linkedPromoId);
+        promoExecutor.execute(executor, linkedPromoId, true);
 
         return Command.SINGLE_SUCCESS;
     }
